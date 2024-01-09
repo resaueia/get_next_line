@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/08 19:44:52 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/09 20:05:59 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,29 +39,47 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	return (test);
 }
 
+char	content_reader(const *str)
+{
+	const char	*temp;
+
+	*temp = *str;
+	while (*temp)
+	{
+		if (*temp == '\n')
+		{
+			temp++;
+			break;
+		}
+		temp++;
+	}
+	return (temp);
+}
+
 char	*get_next_line(int fd)
 {
 	static char	*storage;
 	char	*buffer;
+	char	*line;
 	int	bytes_read;
 
-	bytes_read = 0;
+	bytes_read = 1;
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
 	while (bytes_read > 0)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read <= 0)
-			free (buffer);
+		if (bytes_read == -1)
 			return (NULL);
+		if (bytes_read == 0)
+			free (buffer);
+			return (storage);
+		buffer[bytes_read] = '\0';
 		storage = ft_strjoin(storage, buffer);
-		while (*buffer)
-		{
-			if (*buffer == '\n')
-				break;
-		}
-	return (buffer);
+		line = content_reader(*storage);
+	}
+	return (line);
 	}
 }
 
