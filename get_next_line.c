@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/09 20:05:59 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/11 20:59:09 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,21 +39,45 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	return (test);
 }
 
-char	content_reader(const *str)
+char	line_reader(const *str)
 {
-	const char	*temp;
-
-	*temp = *str;
-	while (*temp)
+	while (*str)
 	{
-		if (*temp == '\n')
+		if (*str == '\n')
 		{
-			temp++;
+			str++;
 			break;
 		}
-		temp++;
+		str++;
 	}
-	return (temp);
+	return (str);
+}
+
+char	*process_line(char *str)
+{
+	int	count;
+	int	i;
+	char	*line;
+
+	count = 0;
+	i = 0;
+	while (str[count] != '\0')
+	{
+		if (str[count] == '\n')
+			count++;
+			break;
+		count++;
+	}
+	line = (char *)malloc(sizeof(char) * count);
+	if (!line)
+		return (NULL);
+	while (i < count)
+	{
+		line[i] = str[i];
+		i++;
+	}
+	line[count] = '\0';
+	return (line);
 }
 
 char	*get_next_line(int fd)
@@ -67,7 +91,7 @@ char	*get_next_line(int fd)
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	while (bytes_read > 0)
+	while (bytes_read > 0 || fd >= 0 || )
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
@@ -77,10 +101,10 @@ char	*get_next_line(int fd)
 			return (storage);
 		buffer[bytes_read] = '\0';
 		storage = ft_strjoin(storage, buffer);
-		line = content_reader(*storage);
+		line = line_reader(*storage);
+
 	}
 	return (line);
-	}
 }
 
 int	main()
