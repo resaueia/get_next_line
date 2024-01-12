@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/11 20:59:09 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/12 20:38:57 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,36 @@ char	line_reader(const *str)
 	return (str);
 }
 
-char	*process_line(char *str)
+char	*get_surplus(char *storage)
+{
+	int	count;
+	int	i;
+	int	j;
+	char	*line;
+
+	count = 0;
+	i = 0;
+	j = 0;
+	if (storage)
+		return (NULL);
+	while (storage[count] != '\n')
+		count++;
+	while (storage[count + i] != '\0')
+		i++;
+	line = (char *)malloc(sizeof(char) * i + 1);
+	if (!line)
+		return (NULL);
+	while (storage[i])
+	{
+		line[j] = storage[count + j];
+		j++;
+	}
+	line[j] = '\0';
+	free(storage);
+	return (line);
+}
+
+char	*process_line(char *storage)
 {
 	int	count;
 	int	i;
@@ -61,11 +90,13 @@ char	*process_line(char *str)
 
 	count = 0;
 	i = 0;
-	while (str[count] != '\0')
+	while (storage[count] != '\0')
 	{
-		if (str[count] == '\n')
+		if (storage[count] == '\n')
+		{
 			count++;
 			break;
+		}
 		count++;
 	}
 	line = (char *)malloc(sizeof(char) * count);
@@ -91,19 +122,25 @@ char	*get_next_line(int fd)
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	while (bytes_read > 0 || fd >= 0 || )
+	while (bytes_read > 0 || ft_strchr(storage) == 1 )
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
+		{
+			free(buffer);
 			return (NULL);
-		if (bytes_read == 0)
-			free (buffer);
-			return (storage);
+		}
+		//if (bytes_read == 0)
+		//	free (buffer);
+		//	return (storage);
 		buffer[bytes_read] = '\0';
 		storage = ft_strjoin(storage, buffer);
-		line = line_reader(*storage);
-
 	}
+	free(buffer);
+	line = process_line(storage);
+	//temp = &storage;
+	storage = get_surplus(storage);
+	//free(temp);
 	return (line);
 }
 
