@@ -6,39 +6,66 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/12 20:38:57 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/15 17:18:33 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-char	*ft_strjoin(char const *s1, char const *s2)
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int	ft_strlen(char *str)
+{
+	int	count;
+
+	count = 0;
+	while (str[count] != '\0')
+		count++;
+	return (count);
+}
+
+int	ft_strchr(char *str, char c)
+{
+	int	count;
+
+	count = 0;
+	while (str[count] != '\0')
+	{
+		if (str[count] == c)
+			return (1);
+		count++;
+	}
+	if (c == '\0')
+		return (0);
+	return (0);
+}
+
+char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*newstr;
-	char	*test;
 	size_t	i;
 	size_t	j;
 
 	newstr = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
-	test = newstr;
 	i = 0;
 	j = 0;
 	if (newstr == NULL)
 		return (NULL);
 	while (s1[i])
 	{
-		*newstr = s1[i];
-		newstr++;
+		newstr[i] = s1[i];
 		i++;
 	}
 	while (s2[j])
 	{
-		*newstr = s2[j];
-		newstr++;
+		newstr[i + j] = s2[j];
 		j++;
 	}
-	*newstr = '\0';
-	return (test);
+	newstr[j + i] = '\0';
+	return (newstr);
 }
-
+/*
 char	line_reader(const *str)
 {
 	while (*str)
@@ -51,7 +78,7 @@ char	line_reader(const *str)
 		str++;
 	}
 	return (str);
-}
+}*/
 
 char	*get_surplus(char *storage)
 {
@@ -63,13 +90,13 @@ char	*get_surplus(char *storage)
 	count = 0;
 	i = 0;
 	j = 0;
-	if (storage)
+	if (!storage)
 		return (NULL);
 	while (storage[count] != '\n')
 		count++;
 	while (storage[count + i] != '\0')
 		i++;
-	line = (char *)malloc(sizeof(char) * i + 1);
+	line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
 	while (storage[i])
@@ -99,12 +126,12 @@ char	*process_line(char *storage)
 		}
 		count++;
 	}
-	line = (char *)malloc(sizeof(char) * count);
+	line = (char *)malloc(sizeof(char) * (count + 1));
 	if (!line)
 		return (NULL);
 	while (i < count)
 	{
-		line[i] = str[i];
+		line[i] = storage[i];
 		i++;
 	}
 	line[count] = '\0';
@@ -122,7 +149,7 @@ char	*get_next_line(int fd)
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	while (bytes_read > 0 || ft_strchr(storage) == 1 )
+	while (bytes_read > 0 || ft_strchr(storage, '\n') == 1 )
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
@@ -130,17 +157,12 @@ char	*get_next_line(int fd)
 			free(buffer);
 			return (NULL);
 		}
-		//if (bytes_read == 0)
-		//	free (buffer);
-		//	return (storage);
 		buffer[bytes_read] = '\0';
 		storage = ft_strjoin(storage, buffer);
 	}
 	free(buffer);
 	line = process_line(storage);
-	//temp = &storage;
 	storage = get_surplus(storage);
-	//free(temp);
 	return (line);
 }
 
@@ -151,11 +173,12 @@ int	main()
 	int	byte_size;
 
 	fd = open("test.txt", O_RDONLY | O_CREAT);
-	while ((byte_size = read(fd, buffer, 5)))
+	if (fd == -1)
 	{
-		printf("%d\n", byte_size);
-		buffer[byte_size] = '\0';
-		printf("%s\n", buffer);
+		perror("Error opening the file");
+		return 1;  // Or handle the error appropriately
 	}
+
+	printf("%s", get_next_line(fd));
 	return(0);
 }
