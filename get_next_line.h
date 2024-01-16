@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 18:01:13 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/16 19:28:29 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/16 20:55:40 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define GET_NEXT_LINE_H
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
+# define BUFFER_SIZE 42
 #endif
 
 char	*get_next_line(int fd);

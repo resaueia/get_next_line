@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/16 19:40:15 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/16 20:54:03 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,6 @@ char	*get_surplus(char *storage)
 	char	*line;
 
 	count = 0;
-	//i = 1;
 	i = 0;
 	j = 0;
 	if (!storage)
@@ -122,24 +121,17 @@ char	*get_surplus(char *storage)
 		count++;
 	if (storage[count] == '\n')
 		count++;
-	while (storage[i])
-		i++;
-	surplus = i - count;
-	line = malloc(sizeof(char) * surplus + 1);
-	line[surplus] = '\0';
-	/*
 	while (storage[count + i] != '\0')
 		i++;
 	line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
-	*/
-	while (count < i)
+	while (j < i)
 	{
 		line[j] = storage[count + j];
 		j++;
 	}
-	//line[j] = '\0';
+	line[j] = '\0';
 	free(storage);
 	return (line);
 }
@@ -161,7 +153,7 @@ char	*process_line(char *storage)
 		}
 		count++;
 	}
-	line = (char *)malloc(sizeof(char) * (count)); //count + 1
+	line = (char *)malloc(sizeof(char) * (count + 1)); //count + 1
 	if (!line)
 		return (NULL);
 	while (i < count)
@@ -175,7 +167,6 @@ char	*process_line(char *storage)
 
 char	*get_next_line(int fd)
 {
-	//static char	*storage = "";
 	static char	*storage = NULL;
 	char	*buffer;
 	char	*line;
@@ -188,7 +179,6 @@ char	*get_next_line(int fd)
 	if (!buffer)
 		return (NULL);
 	line = 0;
-
 	while (bytes_read > 0 && !ft_strchr(storage, '\n'))
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
@@ -213,6 +203,7 @@ char	*get_next_line(int fd)
 		return (NULL);
 	line = process_line(storage);
 	storage = get_surplus(storage);
+	write(1, "OPA", 3);
 	return (line);
 }
 
