@@ -6,31 +6,33 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/15 17:18:33 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/16 19:40:15 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
+#include "get_next_line.h"
 
 int	ft_strlen(char *str)
 {
 	int	count;
 
+	if (!str)
+		return (0);
 	count = 0;
-	while (str[count] != '\0')
+	while (str[count])
 		count++;
 	return (count);
 }
+
 
 int	ft_strchr(char *str, char c)
 {
 	int	count;
 
 	count = 0;
-	while (str[count] != '\0')
+	if (!str)
+		return (0);
+	while (str[count] && str[count] != '\0')
 	{
 		if (str[count] == c)
 			return (1);
@@ -40,7 +42,25 @@ int	ft_strchr(char *str, char c)
 		return (0);
 	return (0);
 }
+/*
+int	ft_strrchr(char *s, int c)
+{
+	int	len;
 
+	if (!s)
+		return (0);
+	len = ft_strlen(s);
+	while (len > 0)
+	{
+		if (s[len - 1] == c)
+			return (1);
+		len--;
+	}
+	if (c == '\0')
+		return (0);
+	return (0);
+}
+*/
 char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*newstr;
@@ -52,11 +72,15 @@ char	*ft_strjoin(char *s1, char *s2)
 	j = 0;
 	if (newstr == NULL)
 		return (NULL);
-	while (s1[i])
+	if (s1)
 	{
-		newstr[i] = s1[i];
-		i++;
-	}
+		while (s1[i])
+		{
+			newstr[i] = s1[i];
+			i++;
+		}
+		free(s1);
+	}	
 	while (s2[j])
 	{
 		newstr[i + j] = s2[j];
@@ -85,26 +109,37 @@ char	*get_surplus(char *storage)
 	int	count;
 	int	i;
 	int	j;
+	int	surplus;
 	char	*line;
 
 	count = 0;
+	//i = 1;
 	i = 0;
 	j = 0;
 	if (!storage)
 		return (NULL);
-	while (storage[count] != '\n')
+	while (storage[count] != '\0' && storage[count] != '\n')
 		count++;
+	if (storage[count] == '\n')
+		count++;
+	while (storage[i])
+		i++;
+	surplus = i - count;
+	line = malloc(sizeof(char) * surplus + 1);
+	line[surplus] = '\0';
+	/*
 	while (storage[count + i] != '\0')
 		i++;
 	line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
-	while (storage[i])
+	*/
+	while (count < i)
 	{
 		line[j] = storage[count + j];
 		j++;
 	}
-	line[j] = '\0';
+	//line[j] = '\0';
 	free(storage);
 	return (line);
 }
@@ -126,7 +161,7 @@ char	*process_line(char *storage)
 		}
 		count++;
 	}
-	line = (char *)malloc(sizeof(char) * (count + 1));
+	line = (char *)malloc(sizeof(char) * (count)); //count + 1
 	if (!line)
 		return (NULL);
 	while (i < count)
@@ -140,16 +175,21 @@ char	*process_line(char *storage)
 
 char	*get_next_line(int fd)
 {
-	static char	*storage;
+	//static char	*storage = "";
+	static char	*storage = NULL;
 	char	*buffer;
 	char	*line;
 	int	bytes_read;
 
+	if (fd < 0 || BUFFER_SIZE < 1)
+		return (NULL);
 	bytes_read = 1;
 	buffer = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buffer)
 		return (NULL);
-	while (bytes_read > 0 || ft_strchr(storage, '\n') == 1 )
+	line = 0;
+
+	while (bytes_read > 0 && !ft_strchr(storage, '\n'))
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read == -1)
@@ -157,10 +197,20 @@ char	*get_next_line(int fd)
 			free(buffer);
 			return (NULL);
 		}
+		if (bytes_read == 0)
+			break;
 		buffer[bytes_read] = '\0';
 		storage = ft_strjoin(storage, buffer);
 	}
 	free(buffer);
+	if (storage && storage[0] == '\0')
+	{
+		if (storage)
+			free(storage);
+		return (NULL);
+	}
+	if (!storage)
+		return (NULL);
 	line = process_line(storage);
 	storage = get_surplus(storage);
 	return (line);
@@ -169,16 +219,23 @@ char	*get_next_line(int fd)
 int	main()
 {
 	int	fd;
-	char	buffer[100];
-	int	byte_size;
+	char	*buffer;
+//	int	byte_size;
+	int 	test = 10;
 
-	fd = open("test.txt", O_RDONLY | O_CREAT);
-	if (fd == -1)
-	{
-		perror("Error opening the file");
-		return 1;  // Or handle the error appropriately
+
+//	write(1, "OPAA\n", 5);
+	fd = open("test.txt", O_RDONLY);
+	//printf("%d", fd);
+	buffer = get_next_line(fd);
+	while (buffer && test--)
+	{		
+		printf("%s", buffer);
+		free(buffer);
+		buffer = get_next_line(fd);
 	}
-
-	printf("%s", get_next_line(fd));
+	if (buffer)
+		free(buffer);
+	close(fd);
 	return(0);
 }

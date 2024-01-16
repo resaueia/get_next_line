@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 18:01:13 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/15 19:08:34 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/16 19:28:29 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define GET_NEXT_LINE_H
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 3
+# define BUFFER_SIZE 1
 #endif
 
 char	*get_next_line(int fd);
@@ -26,5 +26,7 @@ char	*process_line(char *storage);
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
 
 #endif
