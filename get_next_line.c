@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/16 20:54:03 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/16 21:16:16 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,25 +42,7 @@ int	ft_strchr(char *str, char c)
 		return (0);
 	return (0);
 }
-/*
-int	ft_strrchr(char *s, int c)
-{
-	int	len;
 
-	if (!s)
-		return (0);
-	len = ft_strlen(s);
-	while (len > 0)
-	{
-		if (s[len - 1] == c)
-			return (1);
-		len--;
-	}
-	if (c == '\0')
-		return (0);
-	return (0);
-}
-*/
 char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*newstr;
@@ -89,27 +71,12 @@ char	*ft_strjoin(char *s1, char *s2)
 	newstr[j + i] = '\0';
 	return (newstr);
 }
-/*
-char	line_reader(const *str)
-{
-	while (*str)
-	{
-		if (*str == '\n')
-		{
-			str++;
-			break;
-		}
-		str++;
-	}
-	return (str);
-}*/
 
 char	*get_surplus(char *storage)
 {
 	int	count;
 	int	i;
 	int	j;
-	int	surplus;
 	char	*line;
 
 	count = 0;
@@ -127,10 +94,10 @@ char	*get_surplus(char *storage)
 	if (!line)
 		return (NULL);
 	while (j < i)
-	{
-		line[j] = storage[count + j];
-		j++;
-	}
+//	{
+		line[j++] = storage[count + j];
+		//j++;
+//	}
 	line[j] = '\0';
 	free(storage);
 	return (line);
@@ -153,7 +120,7 @@ char	*process_line(char *storage)
 		}
 		count++;
 	}
-	line = (char *)malloc(sizeof(char) * (count + 1)); //count + 1
+	line = (char *)malloc(sizeof(char) * (count + 1));
 	if (!line)
 		return (NULL);
 	while (i < count)
@@ -203,7 +170,6 @@ char	*get_next_line(int fd)
 		return (NULL);
 	line = process_line(storage);
 	storage = get_surplus(storage);
-	write(1, "OPA", 3);
 	return (line);
 }
 
