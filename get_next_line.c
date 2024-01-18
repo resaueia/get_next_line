@@ -6,82 +6,22 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 20:07:29 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/16 21:16:16 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/17 21:48:43 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-int	ft_strlen(char *str)
-{
-	int	count;
-
-	if (!str)
-		return (0);
-	count = 0;
-	while (str[count])
-		count++;
-	return (count);
-}
-
-
-int	ft_strchr(char *str, char c)
-{
-	int	count;
-
-	count = 0;
-	if (!str)
-		return (0);
-	while (str[count] && str[count] != '\0')
-	{
-		if (str[count] == c)
-			return (1);
-		count++;
-	}
-	if (c == '\0')
-		return (0);
-	return (0);
-}
-
-char	*ft_strjoin(char *s1, char *s2)
-{
-	char	*newstr;
-	size_t	i;
-	size_t	j;
-
-	newstr = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
-	i = 0;
-	j = 0;
-	if (newstr == NULL)
-		return (NULL);
-	if (s1)
-	{
-		while (s1[i])
-		{
-			newstr[i] = s1[i];
-			i++;
-		}
-		free(s1);
-	}	
-	while (s2[j])
-	{
-		newstr[i + j] = s2[j];
-		j++;
-	}
-	newstr[j + i] = '\0';
-	return (newstr);
-}
 
 char	*get_surplus(char *storage)
 {
 	int	count;
 	int	i;
 	int	j;
-	char	*line;
+	char		*line;
 
 	count = 0;
 	i = 0;
-	j = 0;
+	j = -1;
 	if (!storage)
 		return (NULL);
 	while (storage[count] != '\0' && storage[count] != '\n')
@@ -93,11 +33,8 @@ char	*get_surplus(char *storage)
 	line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
-	while (j < i)
-//	{
-		line[j++] = storage[count + j];
-		//j++;
-//	}
+	while (++j < i)
+		line[j] = storage[count + j];
 	line[j] = '\0';
 	free(storage);
 	return (line);
@@ -131,68 +68,338 @@ char	*process_line(char *storage)
 	line[count] = '\0';
 	return (line);
 }
-
-char	*get_next_line(int fd)
+int	validate_storage(char *storage)
 {
-	static char	*storage = NULL;
-	char	*buffer;
-	char	*line;
-	int	bytes_read;
-
-	if (fd < 0 || BUFFER_SIZE < 1)
-		return (NULL);
-	bytes_read = 1;
-	buffer = (char *)malloc(BUFFER_SIZE + 1);
-	if (!buffer)
-		return (NULL);
-	line = 0;
-	while (bytes_read > 0 && !ft_strchr(storage, '\n'))
-	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == -1)
-		{
-			free(buffer);
-			return (NULL);
-		}
-		if (bytes_read == 0)
-			break;
-		buffer[bytes_read] = '\0';
-		storage = ft_strjoin(storage, buffer);
-	}
-	free(buffer);
 	if (storage && storage[0] == '\0')
 	{
 		if (storage)
 			free(storage);
-		return (NULL);
+		return (0);
 	}
-	if (!storage)
-		return (NULL);
-	line = process_line(storage);
-	storage = get_surplus(storage);
-	return (line);
+	return (1);
 }
-
-int	main()
+char	*read_line(int fd)
 {
-	int	fd;
+	static char	*storage = NULL;
 	char	*buffer;
-//	int	byte_size;
-	int 	test = 10;
+	int	bytes_read;
 
-
-//	write(1, "OPAA\n", 5);
-	fd = open("test.txt", O_RDONLY);
-	//printf("%d", fd);
-	buffer = get_next_line(fd);
-	while (buffer && test--)
-	{		
-		printf("%s", buffer);
-		free(buffer);
-		buffer = get_next_line(fd);
+	buffer = (char *)malloc(BUFFER_SIZE + 1);
+	if (!buffer)
+		return (NULL);
+	bytes_read = 1;
+	while (bytes_read > 0 && !ft_strchr(storage, '\n'))
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read < 0)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		buffer[bytes_read] = '\0';
+		storage = ft_strjoin(storage, buffer);
 	}
-	if (buffer)
-		free(buffer);
-	close(fd);
-	return(0);
+	free(buffer);
+	if (!(storage && validate_storage(storage)))
+		return (NULL);
+	buffer = process_line(storage);
+	storage = get_surplus(storage);
+	return (buffer);
 }
+char	*get_next_line(int fd)
+{
+	if (fd < 0 || BUFFER_SIZE < 1)
+		return (NULL);
+	return (read_line(fd));
+}
+
+
+
+
+/*
+#include <stdio.h>
+int main()
+{
+	int		fd;
+	char	*str;
+
+
+	 1° test
+	printf("Test 1\n\n");
+	fd = open("files/empty", O_RDWR);
+	str = get_next_line(1000);
+	str = get_next_line(-1);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 2° test
+	printf("Test 2\n\n");
+	fd = open("files/empty", O_RDWR);
+	str = get_next_line(fd);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+	// 3° test
+	printf("Test 3\n\n");
+	fd = open("files/nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 4° test
+	printf("Test 4\n\n");
+	fd = open("files/41_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+	// 5° test
+	printf("Test 5\n\n");
+	fd = open("files/41_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 6° test
+	printf("Test 6\n\n");
+	fd = open("files/42_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 7° test
+	printf("Test 7\n\n");
+	fd = open("files/42_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 8° test
+	printf("Test 8\n\n");
+	fd = open("files/43_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 9° test
+	printf("Test 9\n\n");
+	fd = open("files/43_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 10° test
+	printf("Test 10\n\n");
+	fd = open("files/multiple_nlx5", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 11° test
+	printf("Test 11\n\n");
+	fd = open("files/multiple_line_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 12° test
+	printf("Test 12\n\n");
+	fd = open("files/multiple_line_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 13° test
+	printf("Test 13\n\n");
+	fd = open("files/alternate_line_nl_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 14° test
+	printf("Test 14\n\n");
+	fd = open("files/alternate_line_nl_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 15° test
+	printf("Test 15\n\n");
+	fd = open("files/big_line_no_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}
+
+	// 16° test
+	printf("Test 16\n\n");
+	fd = open("files/big_line_with_nl", O_RDWR);
+	str = get_next_line(fd);
+	printf("%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	if (!str)
+		printf("(null)\n");
+	close(fd);
+}*/
