@@ -6,7 +6,7 @@
 /*   By: rsaueia- <rsaueia-@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 17:06:31 by rsaueia-          #+#    #+#             */
-/*   Updated: 2024/01/17 17:08:10 by rsaueia-         ###   ########.fr       */
+/*   Updated: 2024/01/18 18:56:39 by rsaueia-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ int	ft_strlen(char *str)
 		count++;
 	return (count);
 }
-
 
 int	ft_strchr(char *str, char c)
 {
@@ -60,7 +59,7 @@ char	*ft_strjoin(char *s1, char *s2)
 			i++;
 		}
 		free(s1);
-	}	
+	}
 	while (*s2)
 		newstr[i++] = *s2++;
 	newstr[i] = '\0';
